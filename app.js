@@ -34,32 +34,16 @@ db.once('connected', ()=>{
 })
 
 const router = routes.router
-const model = routes.model
+const userModel = routes.userModel
+const postModel = routes.postModel
 app.use("/api", router)
 
-router.post('/signup', async (req, res) => {
-    const {email, password} = req.body;
-    try {
-        const userExisting = await model.findOne({"email": email}, "email")
-        if(userExisting !== null){
-            return res.status(400).json({message:"taken"})
-        }
-        const data = new model({
-            email: email,
-            password: password
-        })
-        const dataToSave = await data.save()
-        res.status(200).json({data: dataToSave, message:"success"})
-    }
-    catch (error) {
-        res.status(400).json({message: error.message})
-    }
-})
+
 
 router.post('/auth', async (req, res)=>{
-    const {email, password} = req.body;
+    const {email, password} = req.body
     try{
-        const user = await model.findOne({"email" : email}, "email password")
+        const user = await userModel.findOne({"email" : email}, "email password")
         if(user !== null){
             if(user.password === password){
                 let loginData = {
@@ -67,7 +51,7 @@ router.post('/auth', async (req, res)=>{
                     signinTime : Date.now()
                 }
                 const token = jwt.sign(loginData, jwtSecretKey)
-                return res.status(200).json({message:"success", token: token});
+                return res.status(200).json({message:"success", email: email,token: token});
             }
             else
                 return res.status(401).json({message : "Invalid password"});
@@ -86,7 +70,7 @@ router.post('/verify', (req, res)=>{
     try{
         const verified = jwt.verify(authToken, jwtSecretKey);
         if(verified){
-            return res.status(200).json({status : "logged in", message : 'success' });
+            return res.status(200).json({status : "logged in", message : 'success'});
         }else{
             //Access Denied
             return res.status(401).json({status: 'invalid auth', message: 'error'});
@@ -97,7 +81,6 @@ router.post('/verify', (req, res)=>{
         return res.status(401).json({status: 'invalid auth', message: 'error'});
     }
 });
-
 
 app.get('/', (req, res)=>{
     res.send("Auth API.\n Please use POST /auth & POST /verify for authentication");
@@ -117,22 +100,10 @@ app.post('/auth', (req, res)=>{
         }
         else
             return res.status(401).json({message : "Invalid password"});
-            bcrypt.compare(password, user[0].password, function(error, result){
-                if(error){  
-                    console.log(error.message);
-                    return res.status(401).json({message : "Invalid password"});
-                }else{
-                    if(!result){
-                        return res.status(401).json({message : "Invalid password"});
-                    }else{
-                        
-                    }
-                }
-            });
     }else{
         return res.status(401).json({message : "User not found"});
     }
-});
+})
 
 app.post('/signup', (req, res)=>{
     const {email, password} = req.body;
@@ -166,18 +137,6 @@ app.post('/verify', (req, res)=>{
         console.log(error);
         return res.status(401).json({status: 'invalid auth', message: 'error'});
     }
-});
-
-app.post('/check-account', (req, res)=>{
-    const {email} = req.body;
-    const user = db
-        .get('users')
-        .value()
-        .filter((user)=>user.email === email);
-    return res.status(200).json({
-        status: user.length === 1? 'User exists' : 'User does not exist',
-        userExists : user.length === 1
-    })
 });
 
 app.listen(PORT);
