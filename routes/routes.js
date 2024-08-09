@@ -124,6 +124,7 @@ router.post("/requests", async(req, res)=>{
     const user = req.body.user
     try{
         const users = await userModel.findOne({email:user}, "followReqs")
+        if(!users)return res.status(400).json({message:"invalid user name"})
         res.status(200).json({data:users.followReqs, message:"success"})
     }catch(err){
         console.error(err)
@@ -158,7 +159,8 @@ router.post("/confirm", async(req, res)=>{
     }
 })
 
-router.post("/myposts", async(req, res)=>{
+  
+router.post("/profilepage", async(req, res)=>{
     //console.log("receiving feed request")
     const user = req.body.user; 
     try{
