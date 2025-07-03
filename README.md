@@ -13,7 +13,6 @@ This is the server-side application for the MathConnect platform, a web app desi
 - **Node.js** + **Express** (API server)
 - **MongoDB** + **Mongoose** (database & ODM)
 - **JWT** (authentication)
-- **dotenv** (environment configuration)
 
 ## Getting Started
 
@@ -41,7 +40,6 @@ This is the server-side application for the MathConnect platform, a web app desi
    ```bash
    npm run run
    ```
-   The server will run on `http://localhost:3080` by default.
 
 ## API Endpoints
 All endpoints are prefixed with `/api`.
